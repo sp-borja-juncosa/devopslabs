@@ -1,0 +1,34 @@
+rsyslog:
+  image: bjuncosa/rsyslog
+  volumes:
+    - /tmp/syslogdev:/dev
+  hostname: rsyslog
+
+cm1:
+  image: bjuncosa/consul
+  ports:
+    - "8500:8500"
+    - "8300:8300"
+    - "8300:8300/udp"
+    - "8301:8301"
+    - "8301:8301/udp"
+    - "8302:8302"
+    - "8302:8302/udp"
+    - "53:53/udp"
+  command: -server -advertise 192.168.59.103 -bootstrap -syslog
+  hostname: cm1
+  environment:
+    - SERVICE_8500_NAME=consul_web
+    - SERVICE_53_NAME=consul_dns
+  volumes:
+    - /tmp/syslogdev/log:/dev/log
+
+registrator:
+  image: progrium/registrator
+  command: consul://192.168.59.103:8500
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+    - /tmp/syslogdev/log:/dev/log
+  hostname: registrator
+
+

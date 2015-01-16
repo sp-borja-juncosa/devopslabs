@@ -1,0 +1,22 @@
+lock1:
+  image: redis
+  ports:
+    - "6379:6379"
+  command: redis-server --syslog-enabled yes
+  hostname: lock1
+  environment:
+    - SERVICE_NAME=lock
+  volumes:
+    - /tmp/syslogdev/log:/dev/log
+
+lock2:
+  image: redis
+  ports:
+    - "6380:6379"
+  command: redis-server --syslog-enabled yes
+  hostname: lock2
+  environment:
+    - SERVICE_NAME=lock
+  volumes:
+    - /tmp/syslogdev/log:/dev/log
+
