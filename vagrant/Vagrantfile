@@ -1,0 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+node = {:hostname => 'devopslabs1' }
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define node[:hostname]
+  config.vm.box = "trusty-server-cloudimg-amd64"
+  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+
+  config.vm.hostname = node[:hostname]
+
+  config.vm.network "forwarded_port", guest: 80, host: 180
+  config.vm.synced_folder "/Users/bjuncosa/Documents/workspace/labs/devops/", "/usr/src"
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize [
+      'modifyvm', :id,
+      '--name', node[:hostname]
+    ]
+  end
+
+  $docker_install = <<EOF
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+sudo sh -c "echo deb https://get.docker.com/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+sudo apt-get update
+sudo apt-get -qy install lxc-docker
+sudo echo "DOCKER_OPTS=\\\"--dns $(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}') --dns 8.8.8.8\\\"" >> /etc/default/docker
+sudo service docker restart
+EOF
+
+  $install_images = <<EOF
+mkdir /tmp/syslogdev
+sudo apt-get -qy install python-pip
+sudo pip install fig
+cd /usr/src/docker/spbase/
+fig up -d rsyslog
+fig up -d
+EOF
+
+
+  config.vm.provision "shell", inline: $docker_install
+  config.vm.provision "shell", inline: $install_images
+
+end
+
