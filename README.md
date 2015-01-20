@@ -1,7 +1,7 @@
 Requisites
 ==========
 
-To run this project you will need virtualbox and vagrant.
+To run this project you will need *virtualbox* and *vagrant*.
 
 Setting it up
 =============
