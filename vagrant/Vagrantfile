@@ -13,6 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.hostname = node[:hostname]
 
   config.vm.network "forwarded_port", guest: 80, host: 180
+  config.vm.network "forwarded_port", guest: 8500, host: 8500
   config.vm.synced_folder "/Users/bjuncosa/Documents/workspace/labs/devops/", "/usr/src"
 
   config.vm.provider :virtualbox do |vb|
@@ -27,15 +28,24 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869
 sudo sh -c "echo deb https://get.docker.com/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
 sudo apt-get update
 sudo apt-get -qy install lxc-docker
+service docker restart
+if [ "$(egrep "^DOCKER_OPTS" /etc/default/docker)" != "" ]; then
+  egrep -v "^DOCKER_OPTS" /etc/default/docker > /tmp/default_docker
+  cp /tmp/default_docker /etc/default/docker
+fi
 sudo echo "DOCKER_OPTS=\\\"--dns $(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}') --dns 8.8.8.8\\\"" >> /etc/default/docker
 sudo service docker restart
 EOF
 
   $install_images = <<EOF
+id
 mkdir /tmp/syslogdev
 sudo apt-get -qy install python-pip
 sudo pip install fig
 cd /usr/src/docker/spbase/
+export PUB_IP=$(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}')
+echo "Public ip: ${PUB_IP}"
+sed "s:PUB_IP:$PUB_IP:g" fig_template.yml > fig.yml
 fig up -d rsyslog
 fig up -d
 EOF
@@ -44,5 +54,9 @@ EOF
   config.vm.provision "shell", inline: $docker_install
   config.vm.provision "shell", inline: $install_images
 
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
+  end
 end
 
