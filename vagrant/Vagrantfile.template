@@ -14,7 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.network "forwarded_port", guest: 80, host: 180
   config.vm.network "forwarded_port", guest: 8500, host: 8500
-  config.vm.synced_folder "/Users/bjuncosa/Documents/workspace/labs/devops/", "/usr/src"
+  config.vm.synced_folder "BASE_SYNC_FOLDER", "/usr/src"
 
   config.vm.provider :virtualbox do |vb|
     vb.customize [
@@ -38,13 +38,11 @@ sudo service docker restart
 EOF
 
   $install_images = <<EOF
-id
 mkdir /tmp/syslogdev
 sudo apt-get -qy install python-pip
 sudo pip install fig
 cd /usr/src/docker/spbase/
 export PUB_IP=$(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}')
-echo "Public ip: ${PUB_IP}"
 sed "s:PUB_IP:$PUB_IP:g" fig_template.yml > fig.yml
 fig up -d rsyslog
 fig up -d
