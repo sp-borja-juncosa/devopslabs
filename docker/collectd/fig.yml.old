@@ -1,10 +1,11 @@
 collectd:
-  build: .
+  image: lopter/collectd-graphite
   volumes:
     - /tmp/syslogdev:/dev
-    - /tmp/rrd:/var/lib/collectd/rrd:rw
   hostname: collectd
   ports:
-    - "25826:25826/udp"
+    - "1200:8080"
+    - "25827:25826/udp"
   environment:
+    - SERVICE_8080_NAME=graphite
     - SERVICE_25826_udp_NAME=collectd-server
