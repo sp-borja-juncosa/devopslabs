@@ -35,22 +35,39 @@ if [ "$(egrep "^DOCKER_OPTS" /etc/default/docker)" != "" ]; then
 fi
 sudo echo "DOCKER_OPTS=\\\"--dns $(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}') --dns 8.8.8.8\\\"" >> /etc/default/docker
 sudo service docker restart
+cp /etc/resolv.conf /etc/resolv.conf.bckp
+egrep -v "nameserver 127.0.0.1" /etc/resolv.conf > /tmp/resolv
+echo "nameserver 127.0.0.1" | cat - /tmp/resolv > /etc/resolv.conf
 EOF
 
   $install_images = <<EOF
 mkdir /tmp/syslogdev
 sudo apt-get -qy install python-pip
 sudo pip install fig
+cd /usr/src/rsyslog/
+fig up -d
 cd /usr/src/docker/spbase/
 export PUB_IP=$(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}')
 sed "s:PUB_IP:$PUB_IP:g" fig_template.yml > fig.yml
-fig up -d rsyslog
+fig up -d
+cd /usr/src/collectd/
+fig up -d
+cd /usr/src/visage/
 fig up -d
 EOF
 
+  $install_local_collectd = <<EOF
+apt-get install -y collectd
+echo 'LoadPlugin network\
+<Plugin network>\
+  Server "collectd.service.consul" "25826"\
+</Plugin>' > /etc/collectd/collectd.conf.d/network.conf
+service collectd restart
+EOF
 
   config.vm.provision "shell", inline: $docker_install
   config.vm.provision "shell", inline: $install_images
+  config.vm.provision "shell", inline: $install_local_collectd
 
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]

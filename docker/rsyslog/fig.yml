@@ -1,0 +1,6 @@
+rsyslog:
+  build: /usr/src/docker/rsyslog
+  volumes:
+    - /tmp/syslogdev:/dev
+  hostname: rsyslog
+

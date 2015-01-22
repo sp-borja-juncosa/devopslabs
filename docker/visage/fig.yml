@@ -1,0 +1,10 @@
+visage:
+  build: .
+  volumes:
+    - /tmp/syslogdev:/dev
+    - /tmp/rrd:/var/lib/collectd/rrd:ro
+  hostname: visage
+  ports:
+    - "9292:9292"
+  environment:
+    - SERVICE_NAME=visage

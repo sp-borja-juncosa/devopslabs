@@ -7,4 +7,4 @@ collectd:
   ports:
     - "25826:25826/udp"
   environment:
-    - SERVICE_25826_udp_NAME=collectd-server
+    - SERVICE_NAME=collectd

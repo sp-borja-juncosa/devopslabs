@@ -1,9 +1,3 @@
-rsyslog:
-  build: /usr/src/docker/rsyslog
-  volumes:
-    - /tmp/syslogdev:/dev
-  hostname: rsyslog
-
 consul:
   image: progrium/consul
   ports:
@@ -17,8 +11,6 @@ consul:
     - "53:53/udp"
   command: -server -bootstrap -advertise PUB_IP -syslog -ui-dir /ui
   hostname: consul
-  links:
-    - rsyslog
   environment:
     - SERVICE_8500_NAME=consul_web
     - SERVICE_53_NAME=consul_dns
@@ -30,7 +22,6 @@ registrator:
   command: consul://consul:8500
   links:
     - consul
-    - rsyslog
   volumes:
     - /var/run/docker.sock:/tmp/docker.sock
     - /tmp/syslogdev/log:/dev/log
