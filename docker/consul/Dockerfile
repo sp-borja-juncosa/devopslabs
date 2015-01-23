@@ -11,6 +11,9 @@ RUN cd /usr/sbin && unzip /tmp/consul.zip && chmod +x /usr/sbin/consul && rm /tm
 ADD https://dl.bintray.com/mitchellh/consul/0.4.1_web_ui.zip /tmp/webui.zip
 RUN cd /tmp/ && unzip webui.zip && mv dist/ /webui/
 
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 ADD consul.json /config
 
 EXPOSE 53/udp 8300 8301 8301/udp 8302 8302/udp 8400 8500

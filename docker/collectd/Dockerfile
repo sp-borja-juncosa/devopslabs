@@ -21,6 +21,9 @@ RUN apt-get update && \
 
 RUN apt-get install -y rrdtool
 
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 ADD collectd.conf /etc/collectd/
 
 EXPOSE 25826/udp
