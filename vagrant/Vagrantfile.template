@@ -14,6 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.network "forwarded_port", guest: 80, host: 180
   config.vm.network "forwarded_port", guest: 8500, host: 8500
+  config.vm.network "forwarded_port", guest: 9292, host: 9292
   config.vm.synced_folder "BASE_SYNC_FOLDER", "/usr/src"
 
   config.vm.provider :virtualbox do |vb|
@@ -44,23 +45,23 @@ EOF
 mkdir /tmp/syslogdev
 sudo apt-get -qy install python-pip
 sudo pip install fig
-cd /usr/src/rsyslog/
+cd /usr/src/docker/rsyslog/
 fig up -d
 cd /usr/src/docker/spbase/
 export PUB_IP=$(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}')
 sed "s:PUB_IP:$PUB_IP:g" fig_template.yml > fig.yml
 fig up -d
-cd /usr/src/collectd/
+cd /usr/src/docker/collectd/
 fig up -d
-cd /usr/src/visage/
+cd /usr/src/docker/visage/
 fig up -d
 EOF
 
   $install_local_collectd = <<EOF
 apt-get install -y collectd
-echo 'LoadPlugin network\
-<Plugin network>\
-  Server "collectd.service.consul" "25826"\
+echo 'LoadPlugin network
+<Plugin network>
+  Server "collectd.service.consul" "25826"
 </Plugin>' > /etc/collectd/collectd.conf.d/network.conf
 service collectd restart
 EOF
