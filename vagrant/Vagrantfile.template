@@ -36,25 +36,16 @@ if [ "$(egrep "^DOCKER_OPTS" /etc/default/docker)" != "" ]; then
 fi
 sudo echo "DOCKER_OPTS=\\\"--dns $(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}') --dns 8.8.8.8\\\"" >> /etc/default/docker
 sudo service docker restart
-cp /etc/resolv.conf /etc/resolv.conf.bckp
-egrep -v "nameserver 127.0.0.1" /etc/resolv.conf > /tmp/resolv
-echo "nameserver 127.0.0.1" | cat - /tmp/resolv > /etc/resolv.conf
 EOF
 
   $install_images = <<EOF
 mkdir /tmp/syslogdev
 sudo apt-get -qy install python-pip
 sudo pip install fig
-cd /usr/src/docker/rsyslog/
-fig up -d
-cd /usr/src/docker/spbase/
-export PUB_IP=$(ifconfig eth0 | awk '/inet addr:/{print substr($2,match($2,":")+1,length($2))}')
-sed "s:PUB_IP:$PUB_IP:g" fig_template.yml > fig.yml
-fig up -d
-cd /usr/src/docker/collectd/
-fig up -d
-cd /usr/src/docker/visage/
-fig up -d
+/usr/src/docker/start_all.sh
+cp /etc/resolv.conf /etc/resolv.conf.bckp
+egrep -v "nameserver 127.0.0.1" /etc/resolv.conf > /tmp/resolv
+echo "nameserver 127.0.0.1" | cat - /tmp/resolv > /etc/resolv.conf
 EOF
 
   $install_local_collectd = <<EOF
