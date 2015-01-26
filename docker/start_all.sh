@@ -4,21 +4,23 @@ function start_container() {
   CPATH=$1
   CNAME=$2
 
-  retries=3
+  retries=10
   retry=0
 
   cd $CPATH
   while true; do
     echo "Creating $CNAME container ($retry)..."
     fig up -d --no-recreate
-    if [ $? -eq 0 -o $retry -gt $retries ]; then
+    if [ $? -eq 0 ]; then
       break
     else
       retry=$(( $retry + 1 ))
     fi
+    if [ $retry -gt $retries ]; then
+      echo "Failed to start $CNAME container. Retried $retries times"
+      exit 1
+    fi
   done
-
-  [ $retry -gt $retries ] && echo "Failed to start $CNAME container. Retried $retries times"
 }
 
 start_container /usr/src/docker/rsyslog/ rsyslog
