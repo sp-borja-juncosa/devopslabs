@@ -26,6 +26,8 @@ collect ()
 
     # Shorten the name to 12 for brevity, like docker does
     NAME=$(expr substr $1 1 12);
+    CNAME=$(docker ps -f id=$NAME | grep $NAME | awk '{print $NF}')
+    NAME=${CNAME:-$NAME}
 
     # If we are in a cpuacct cgroup, we can collect cpu usage stats
     if [ -e cpuacct.stat ]; then

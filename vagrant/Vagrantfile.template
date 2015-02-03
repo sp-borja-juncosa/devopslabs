@@ -54,6 +54,11 @@ echo 'LoadPlugin network
 <Plugin network>
   Server "collectd.service.consul" "25826"
 </Plugin>' > /etc/collectd/collectd.conf.d/network.conf
+useradd docker -g docker
+echo 'LoadPlugin exec
+<Plugin exec>
+  Exec docker "/usr/src/collectd-docker.sh"
+</Plugin>' > /etc/collectd/collectd.conf.d/docker.conf
 service collectd restart
 EOF
 
