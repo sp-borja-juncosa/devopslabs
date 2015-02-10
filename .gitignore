@@ -1,2 +1,3 @@
 docker/spbase/fig.yml
 vagrant/Vagrantfile
+.vagrant
